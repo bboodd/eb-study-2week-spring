@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.study.week2.mapper.PostMapper">
+
+    <!--    게시글 등록-->
+    <insert id="insertPost" parameterType="com.study.week2.model.vo.PostVo" useGeneratedKeys="true" keyProperty="postId">
+        INSERT INTO post(category_id, name, password, title, content)
+        VALUES (#{categoryId}, #{name}, #{password}, #{title}, #{content})
+    </insert>
+
+    <!--    전체 카테고리 리스트 가져오기-->
+    <select id="findAllCategory" resultType="com.study.week2.model.vo.CategoryVo">
+        SELECT category_id AS categoryId, category_name AS categoryName
+        FROM category
+    </select>
+
+    <!--    게시글 리스트 가져오기-->
+    <select id="findAllPostBySearch" parameterType="com.study.week2.model.vo.SearchVo" resultType="com.study.week2.model.vo.PostVo">
+        SELECT
+        post.post_id AS postId,
+        category.category_name AS categoryName,
+        post.name,
+        post.title,
+        post.view_count AS viewCount,
+        DATE_FORMAT(post.create_date, '%Y%.%m%.%d% %h%:%i') AS createDate,
+        DATE_FORMAT(post.update_date, '%Y%.%m%.%d% %h%:%i') AS updateDate,
+        post.state,
+        NULLIF((SELECT COUNT(*) FROM file file WHERE file.post_id = post.post_id), 0) AS fileCount
+        FROM post post
+        JOIN category category
+        ON post.category_id = category.category_id
+        <where>
+            <if test="startDate != null and startDate != ''">
+                AND post.create_date >= #{startDate}
+            </if>
+
+            <if test="endDate != null and endDate != ''">
+                AND #{endDate} >= post.create_date
+            </if>
+
+            <if test="categoryId != null and categoryId != ''">
+                AND post.category_id = #{categoryId}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND CONCAT(post.title, post.name, post.content) LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            AND post.state = 1
+        </where>
+        ORDER BY post.post_id DESC
+    </select>
+
+    <!--    선택 게시글 가져오기  -->
+    <select id="findPostById" parameterType="int" resultType="com.study.week2.model.vo.PostVo">
+        SELECT
+            post.post_id AS postId,
+            category.category_name AS category,
+            post.name,
+            post.password,
+            post.title,
+            post.content,
+            post.view_count AS viewCount,
+            DATE_FORMAT(post.create_date, '%Y%.%m%.%d% %h%:%i') AS createDate,
+            DATE_FORMAT(post.update_date, '%Y%.%m%.%d% %h%:%i') AS updateDate,
+            post.state
+        FROM post post
+                 JOIN category category
+                      ON post.category_id = category.category_id
+        WHERE
+            post.post_id = #{postId}
+    </select>
+
+    <!--    선택 게시글 조회수 증가  -->
+    <update id="increaseViewCountById" parameterType="int">
+        UPDATE post
+        SET view_count = view_count + 1
+        WHERE post_id = #{postId}
+    </update>
+
+    <!--    댓글 추가  -->
+    <insert id="insertComment" parameterType="com.study.week2.model.vo.CommentVo" useGeneratedKeys="true" keyProperty="commentId">
+        INSERT INTO comment(post_id, content)
+        VALUES (#{postId}, #{content})
+    </insert>
+
+    <!--    postId에 해당하는 댓글 리스트로 불러오기  -->
+    <select id="findAllCommentByPostId" parameterType="int" resultType="com.study.week2.model.vo.CommentVo">
+        SELECT
+            comment.content,
+            DATE_FORMAT(comment.create_date, '%Y%.%m%.%d% %h%:%i') AS createDate
+        FROM comment comment
+        WHERE comment.post_id = #{postId}
+    </select>
+
+    <!--    게시글 삭제 구현 ( state를 0으로 만든다 )   -->
+    <update id="deletePostById" parameterType="int">
+        UPDATE post
+        SET state = 0
+        WHERE post_id = #{postId}
+    </update>
+
+    <!--    파일 업로드  -->
+    <insert id="insertFile" parameterType="com.study.week2.model.vo.FileVo" useGeneratedKeys="true" keyProperty="postId">
+        INSERT INTO file(post_id, file_original_name, file_name, file_path, file_size)
+        VALUES (#{postId}, #{fileOriginalName}, #{fileName}, #{filePath}, #{fileSize})
+    </insert>
+
+    <!--    postId에 해당하는 파일 리스트 가져오기   -->
+    <select id="findAllFileByPostId" parameterType="int" resultType="com.study.week2.model.vo.FileVo">
+        SELECT
+            file.file_id AS fileId,
+            file.post_id AS postId,
+            file.file_original_name AS fileOriginalName,
+            file.file_name AS fileName,
+            file.file_path AS filePath,
+            file.file_size AS fileSize
+        FROM
+            file file
+        WHERE
+            file.post_id = ${postId}
+    </select>
+
+    <!--    파일 id에 해당하는 파일 가져오기  -->
+    <select id="findFileByFileId" parameterType="int" resultType="com.study.week2.model.vo.FileVo">
+        SELECT
+            file.post_id AS postId,
+            file.file_original_name AS fileOriginalName,
+            file.file_name AS fileName,
+            file.file_path AS filePath
+        FROM
+            file file
+        WHERE
+            file.file_id = ${fileId}
+    </select>
+</mapper>
