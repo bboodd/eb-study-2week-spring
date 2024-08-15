@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <h1> super app </h1>
+</div>
+
+<div>
+    <h2> add post</h2>
+</div>
+
+<form method="post" action="/add/post" enctype="multipart/form-data" th:object="${postDto}">
+    <p>
+        <label>Category:
+            <select name="categoryId" id="categoryId" th:field="${postDto.categoryId}">
+                <th:block th:if="${categoryList.size() > 0}">
+                    <th:block th:each="category : ${categoryList}">
+                        <option th:value="${category.categoryId}" th:text="${category.categoryName}"></option>
+                    </th:block>
+                </th:block>
+            </select>
+        </label>
+    </p>
+
+    <p>
+        <label>Name:
+            <input type="text" name="name" id="name" th:field="${postDto.name}"><br />
+        </label>
+    </p>
+
+    <p>
+        <label>Password:
+            <input type="password" name="password" id="password" th:field="${postDto.password}"><br />
+        </label>
+    </p>
+    <p>
+        <label>CheckPassword:
+            <input type="password" name="checkPassword" id="checkPassword" th:field="${postDto.checkPassword}"><br />
+        </label>
+    </p>
+    <p>
+        <label>Title:
+            <input type="text" name="title" id="title" th:field="${postDto.title}"><br />
+        </label>
+    </p>
+    <p>
+        <label>Content:
+            <input type="text" name="content" id="content" th:field="${postDto.content}"><br />
+        </label>
+    </p>
+    <p>
+        <label>File:
+            <div id="preview">
+                <!-- File preview will be updated here -->
+            </div>
+            <p>
+                <input type="file" name="files" id="file-input" multiple />
+            </p>
+        </label>
+    </p>
+    <div>
+        <p>
+            <button type="submit">Submit</button>
+        </p>
+    </div>
+</form>
+
+<script>
+    const fileInput = $('#file-input');
+    const preview = $('#preview');
+
+    // 파일 추가
+    $(document).on('change', fileInput, (e) => {
+        const fileList = e.target.files;
+        $(fileList).each((index, file) => {
+            const lastModified = file.lastModified;
+            const name = file.name;
+
+            const view = '<p id="' + lastModified + '">' + name +
+                '<button data-index="' + lastModified +
+                '" class="file-remove">X</button></p>';
+
+            preview.append(view);
+        });
+    });
+
+    // 파일 제거
+    $(document).on('click', '.file-remove', (e) => {
+        e.preventDefault();
+
+        const removeTargetId = e.target.dataset.index;
+        const removeTarget = document.getElementById(removeTargetId);
+        const fileList = fileInput[0].files;
+        const dataTransfer = new DataTransfer();
+
+        $(fileList).filter((index, file) => file.lastModified != removeTargetId)
+            .each((index, file) => {
+                dataTransfer.items.add(file);
+            });
+
+        fileInput[0].files = dataTransfer.files;
+
+        removeTarget.remove();
+    });
+</script>
+
+</body>
+</html>

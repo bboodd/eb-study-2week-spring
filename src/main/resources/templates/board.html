@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>자유게시판</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!--     body에 스크립트 작성했을 때 실행되면 안됨  -->
+</head>
+<body>
+
+<h1 th:text="'자유게시판 - 목록'"></h1>
+<br/>
+<section id="post-board">
+    <div class="inner">
+
+        <div class="box1">
+            <form method="get" action="/">
+                <div class="date">
+                    <label>등록일
+                        <input type="date" name="startDate" id="startDate" th:value="${searchDto.startDate}">
+                        ~
+                        <input type="date" name="endDate" id="endDate" th:value="${searchDto.endDate}">
+                    </label>
+                </div>
+
+                <div class="category">
+                    <!-- 카테고리 테이블에서 출력 -->
+                    <select name="categoryId" id="categoryId">
+                        <option value="0">전체 카테고리</option>
+                        <th:block th:if="${categoryList.size() > 0}">
+                            <th:block th:each="category : ${categoryList}">
+                                <option th:value="${category.categoryId}" th:text="${category.categoryName}"></option>
+                            </th:block>
+                        </th:block>
+                    </select>
+                </div>
+
+                <div class="search">
+                    <!-- 검색창 -->
+                    <input type="text" placeholder="검색어를 입력해 주세요. (제목+작성자+내용)" name="keyword" id="keyword" th:value="${searchDto.keyword}">
+                    <!-- 검색 버튼 -->
+                    <button type="submit">검색</button>
+                </div>
+                <!-- 검색 후 리다이렉트 시 검색어 가지고 있기 -->
+                <script th:if="${searchDto != null}">
+                    $('#startDate').val([[${searchDto.startDate}]]);
+                    $('#endDate').val([[${searchDto.endDate}]]);
+                    $('#categoryId').val([[${searchDto.categoryId}]]);
+                    $('#keyword').val([[${searchDto.keyword}]]);
+                </script>
+            </form>
+        </div>
+
+        <!-- 가져온 list.size -->
+        <div class="box2">
+            <p th:if="${postList != null}" th:text="'총 ' + ${postList.size()} + '건'"></p>
+        </div>
+
+        <div class="box3">
+            <table class="post-list">
+                <thead>
+                <tr>
+                    <th scope="col">카테고리</th>
+                    <th scope="col"></th>
+                    <th scope="col">제목</th>
+                    <th scope="col">작성자</th>
+                    <th scope="col">조회수</th>
+                    <th scope="col">등록 일시</th>
+                    <th scope="col">수정 일시</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- post list 출력 -->
+                <th:block th:if="${postList != null}">
+                    <th:block th:each="post : ${postList}">
+                        <tr>
+                            <td th:text="${post.categoryName}"></td>
+                            <td th:text="${post.fileCount} == 0 ? ' ' : '파일o' "></td>
+                            <td th:onclick="|location.href='post/${post.postId}'|" th:text="${post.title}"></td>
+                            <td th:text="${post.name}"></td>
+                            <td th:text="${post.viewCount}"></td>
+                            <td th:text="${post.createDate}"></td>
+                            <td th:text="${post.updateDate}"></td>
+                        </tr>
+                    </th:block>
+                </th:block>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<button onclick="location.href='/add'">등록</button>
+</body>
+</html>
