@@ -1,6 +1,5 @@
-package com.study.week2.model.dto;
+package com.study.week2.dto;
 
-import com.study.week2.model.vo.SearchVo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -12,17 +11,12 @@ import lombok.*;
 @Builder
 public class SearchDto {
 
-    @NotNull(message = "날짜를 입력해주세요.")
-    private String startDate;
+    private String startDate = "";
 
-    @NotNull(message = "날짜를 입력해주세요.")
-    private String endDate;
+    private String endDate = "";
 
-    @NotBlank(message = "카테고리를 입력해주세요.")
-    @Pattern(regexp = "(0-9)", message = "카테고리를 확인해주세요.")
-    private String categoryId;
+    private String categoryId = "0";
 
-    @NotNull(message = "검색어를 입력해주세요.")
-    private String keyword;
+    private String keyword = "";
 
 }

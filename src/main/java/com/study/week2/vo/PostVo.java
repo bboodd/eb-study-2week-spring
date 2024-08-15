@@ -1,8 +1,6 @@
-package com.study.week2.model.vo;
+package com.study.week2.vo;
 
-import com.study.week2.model.dto.PostDto;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Pattern;
+import com.study.week2.dto.PostDto;
 import lombok.*;
 
 @Builder

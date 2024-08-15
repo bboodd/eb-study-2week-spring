@@ -1,5 +1,5 @@
-package com.study.week2.model.vo;
-import com.study.week2.model.dto.SearchDto;
+package com.study.week2.vo;
+import com.study.week2.dto.SearchDto;
 import lombok.*;
 
 @Builder

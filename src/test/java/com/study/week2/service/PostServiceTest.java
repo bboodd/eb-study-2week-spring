@@ -23,9 +23,9 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class BoardServiceTest {
+class PostServiceTest {
     @InjectMocks
-    BoardService boardService;
+    PostService postService;
 
     @Mock
     PostMapper postMapper;
@@ -41,34 +41,11 @@ class BoardServiceTest {
         given(postMapper.insertPost(postVo)).willReturn(1);
 
         //when
-        boardService.savePost(postVo);
+        postService.savePost(postVo);
 
         //then
         //postMapper의 insertPost가 호출되는지 검증
         then(postMapper).should().insertPost(any());
-    }
-
-    @Test
-    @DisplayName("파일 다건 추가 서비스 테스트")
-    void save_files(){
-        //given
-        List<FileVo> fileList = new ArrayList<>();
-        FileVo fileVo1 = FileVo.builder().postId(1).fileName("uuid")
-                .fileOriginalName("파일이름").filePath("파일경로").fileSize(1024).build();
-        FileVo fileVo2 = FileVo.builder().postId(1).fileName("uuid2")
-                .fileOriginalName("파일이름2").filePath("파일경로").fileSize(1024).build();
-        fileList.add(fileVo1);
-        fileList.add(fileVo2);
-
-        given(postMapper.insertFile(any(FileVo.class))).willReturn(1);
-
-        //when
-        boardService.saveFiles(fileList);
-
-        //then
-        //2번 호출 했는지 확인
-        then(postMapper).should(times(2)).insertFile(any());
-
     }
 
     @Test
@@ -79,7 +56,7 @@ class BoardServiceTest {
         given(postMapper.insertComment(commentVo)).willReturn(1);
 
         //when
-        boardService.saveComment(commentVo);
+        postService.saveComment(commentVo);
 
         //then
         then(postMapper).should().insertComment(any());
@@ -98,7 +75,7 @@ class BoardServiceTest {
         given(postMapper.findAllCategory()).willReturn(categoryList);
 
         //when
-        List<CategoryDto> result = boardService.getCategories();
+        List<CategoryDto> result = postService.getCategories();
 
         //then
         assertThat(result.size()).isEqualTo(2);
@@ -120,28 +97,7 @@ class BoardServiceTest {
         given(postMapper.findAllPostBySearch(searchVo)).willReturn(postList);
 
         //when
-        List<PostDto> result = boardService.getPosts(searchVo);
-
-        //then
-        assertThat(result.size()).isEqualTo(2);
-    }
-
-    @Test
-    @DisplayName("파일 다건 조회 서비스 테스트")
-    void get_files() {
-        //given
-        List<FileVo> fileList = new ArrayList<>();
-        FileVo fileVo1 = FileVo.builder().postId(1).fileName("uuid")
-                .fileOriginalName("파일이름").filePath("파일경로").fileSize(1024).build();
-        FileVo fileVo2 = FileVo.builder().postId(1).fileName("uuid2")
-                .fileOriginalName("파일이름2").filePath("파일경로").fileSize(1024).build();
-        fileList.add(fileVo1);
-        fileList.add(fileVo2);
-
-        given(postMapper.findAllFileByPostId(anyInt())).willReturn(fileList);
-
-        //when
-        List<FileDto> result = boardService.getFiles(1);
+        List<PostDto> result = postService.getPosts(searchVo);
 
         //then
         assertThat(result.size()).isEqualTo(2);
@@ -160,7 +116,7 @@ class BoardServiceTest {
         given(postMapper.findAllCommentByPostId(anyInt())).willReturn(commentList);
 
         //when
-        List<CommentDto> result = boardService.getComments(1);
+        List<CommentDto> result = postService.getComments(1);
 
         //then
         assertThat(result.size()).isEqualTo(2);
@@ -175,25 +131,10 @@ class BoardServiceTest {
         given(postMapper.findPostById(anyInt())).willReturn(postVo1);
 
         //when
-        PostDto result = boardService.getPost(1);
+        PostDto result = postService.getPost(1);
 
         //then
         assertThat(result.getName()).isEqualTo(postVo1.getName());
-    }
-
-    @Test
-    @DisplayName("파일 조회 서비스 테스트")
-    void get_file() {
-        //given
-        FileVo fileVo1 = FileVo.builder().fileId(1).postId(1).fileName("uuid")
-                .fileOriginalName("파일이름").filePath("파일경로").fileSize(1024).build();
-        given(postMapper.findFileByFileId(anyInt())).willReturn(fileVo1);
-
-        //when
-        FileDto result = boardService.getFile(1);
-
-        //then
-        assertThat(result.getFileOriginalName()).isEqualTo(fileVo1.getFileOriginalName());
     }
 
     @Test
@@ -202,7 +143,7 @@ class BoardServiceTest {
         //given
 
         //when
-        boardService.upViewCount(1);
+        postService.upViewCount(1);
 
         //then
         then(postMapper).should().increaseViewCountById(anyInt());
@@ -214,7 +155,7 @@ class BoardServiceTest {
         //given
 
         //when
-        boardService.deletePost(1);
+        postService.deletePost(1);
 
         //then
         then(postMapper).should().deletePostById(anyInt());

@@ -1,5 +1,8 @@
 package com.study.week2.connection;
 
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -27,7 +30,6 @@ public class ConnectionTest {
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
         }
-
         return conn;
     }
 

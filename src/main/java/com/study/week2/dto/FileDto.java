@@ -1,6 +1,6 @@
-package com.study.week2.model.dto;
+package com.study.week2.dto;
 
-import com.study.week2.model.vo.FileVo;
+import com.study.week2.vo.FileVo;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -34,7 +34,9 @@ public class FileDto {
         FileDto fileDto = FileDto.builder()
                 .fileId(fileVo.getFileId())
                 .postId(fileVo.getPostId())
+                .fileName(fileVo.getFileName())
                 .fileOriginalName(fileVo.getFileOriginalName())
+                .filePath(fileVo.getFilePath())
                 .build();
         return fileDto;
     }

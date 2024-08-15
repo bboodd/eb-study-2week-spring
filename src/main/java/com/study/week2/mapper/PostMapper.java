@@ -1,6 +1,6 @@
 package com.study.week2.mapper;
 
-import com.study.week2.model.vo.*;
+import com.study.week2.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -16,8 +16,6 @@ public interface PostMapper {
 
     PostVo findPostById(int postId);
 
-    int increaseViewCountById(int postId);
-
     int insertComment(CommentVo commentVo);
 
     List<CommentVo> findAllCommentByPostId(int postId);
@@ -29,4 +27,6 @@ public interface PostMapper {
     List<FileVo> findAllFileByPostId(int postId);
 
     FileVo findFileByFileId(int fileId);
+
+    int increaseViewCountById(int postId);
 }

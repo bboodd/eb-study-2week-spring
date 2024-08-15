@@ -1,7 +1,6 @@
-package com.study.week2.model.dto;
+package com.study.week2.dto;
 
-import com.study.week2.model.vo.PostVo;
-import jakarta.validation.constraints.Max;
+import com.study.week2.vo.PostVo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -16,7 +15,7 @@ public class PostDto {
     int postId;
 
     @NotBlank(message = "카테고리를 입력해주세요.")
-    @Pattern(regexp = "(0-9)", message = "카테고리를 확인해주세요.")
+    @Pattern(regexp = "[0-9]", message = "카테고리를 확인해주세요.")
     String categoryId;
 
     String categoryName;
@@ -28,6 +27,8 @@ public class PostDto {
     @NotBlank(message = "비밀번호를 입력해주세요.")
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{4,16}$", message = "비밀번호는 4글자 이상, 16글자 미만인 영문/숫자/특수문자를 포함한 문자여야 합니다.")
     String password;
+
+    String checkPassword;
 
     @NotBlank(message = "제목을 입력해주세요.")
     @Size(max = 100, message = "제목은 100글자 미만이여야합니다.")
@@ -68,7 +69,7 @@ public class PostDto {
                 .fileCount(postVo.getFileCount())
                 .status(postVo.getStatus())
                 .build();
-        if(postDto.getCreateDate().equals(postDto.getUpdateDate())){
+        if(postVo.getCreateDate().equals(postVo.getUpdateDate())){
             postDto.setUpdateDate("-");
         }
         return postDto;

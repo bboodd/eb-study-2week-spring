@@ -1,6 +1,6 @@
-package com.study.week2.model.dto;
+package com.study.week2.dto;
 
-import com.study.week2.model.vo.CategoryVo;
+import com.study.week2.vo.CategoryVo;
 import lombok.*;
 
 @AllArgsConstructor

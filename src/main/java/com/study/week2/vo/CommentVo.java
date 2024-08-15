@@ -1,5 +1,5 @@
-package com.study.week2.model.vo;
-import com.study.week2.model.dto.CommentDto;
+package com.study.week2.vo;
+import com.study.week2.dto.CommentDto;
 import lombok.*;
 
 @Builder

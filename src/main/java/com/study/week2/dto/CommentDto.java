@@ -1,6 +1,6 @@
-package com.study.week2.model.dto;
+package com.study.week2.dto;
 
-import com.study.week2.model.vo.CommentVo;
+import com.study.week2.vo.CommentVo;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 

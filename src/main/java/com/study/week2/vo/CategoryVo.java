@@ -1,4 +1,4 @@
-package com.study.week2.model.vo;
+package com.study.week2.vo;
 import lombok.*;
 
 @Builder

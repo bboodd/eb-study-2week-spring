@@ -21,7 +21,8 @@ import static java.util.stream.Collectors.toList;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class BoardService {
+public class PostService {
+    //TODO:받을때 dto안됨
 
     private final PostMapper postMapper;
 
@@ -36,20 +37,6 @@ public class BoardService {
         int postId = postVo.getPostId();
 
         return postId;
-    }
-
-    /**
-     * 파일 다건 등록 후 등록된 개수 반환
-     * @param fileVoList
-     * @return
-     */
-
-    public int saveFiles(List<FileVo> fileVoList){
-        final int[] result = {0}; //lambda 접근
-        fileVoList.stream().forEach(file -> {
-            result[0] += postMapper.insertFile(file);
-        });
-        return result[0];
     }
 
     /**
@@ -91,20 +78,6 @@ public class BoardService {
     }
 
     /**
-     * 파일 목록 조회
-     * @param postId
-     * @return
-     */
-
-    public List<FileDto> getFiles(int postId){
-        List<FileVo> fileList = postMapper.findAllFileByPostId(postId);
-
-        List<FileDto> result = fileList.stream()
-                .map(f -> toDto(f)).collect(toList());
-        return result;
-    }
-
-    /**
      * 댓글 목록 조회
      * @param postId
      * @return
@@ -126,11 +99,6 @@ public class BoardService {
 
     public PostDto getPost(int postId){
         PostDto result = toDto(postMapper.findPostById(postId));
-        return result;
-    }
-
-    public FileDto getFile(int fileId){
-        FileDto result = toDto(postMapper.findFileByFileId(fileId));
         return result;
     }
 
