@@ -1,18 +1,21 @@
 package com.study.week2.service;
 
+import com.study.week2.dto.CategoryDto;
+import com.study.week2.dto.CommentDto;
+import com.study.week2.dto.FileDto;
+import com.study.week2.dto.PostDto;
 import com.study.week2.mapper.PostMapper;
-import com.study.week2.model.dto.*;
-import com.study.week2.model.vo.*;
+import com.study.week2.vo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.study.week2.model.dto.CategoryDto.toDto;
-import static com.study.week2.model.dto.PostDto.toDto;
-import static com.study.week2.model.dto.FileDto.toDto;
-import static com.study.week2.model.dto.CommentDto.toDto;
+import static com.study.week2.dto.CategoryDto.toDto;
+import static com.study.week2.dto.PostDto.toDto;
+import static com.study.week2.dto.FileDto.toDto;
+import static com.study.week2.dto.CommentDto.toDto;
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -31,6 +34,7 @@ public class BoardService {
     public int savePost(PostVo postVo){
         postMapper.insertPost(postVo);
         int postId = postVo.getPostId();
+
         return postId;
     }
 

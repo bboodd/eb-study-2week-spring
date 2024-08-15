@@ -66,7 +66,11 @@ public class PostDto {
                 .createDate(postVo.getCreateDate())
                 .updateDate(postVo.getUpdateDate())
                 .fileCount(postVo.getFileCount())
+                .status(postVo.getStatus())
                 .build();
+        if(postDto.getCreateDate().equals(postDto.getUpdateDate())){
+            postDto.setUpdateDate("-");
+        }
         return postDto;
     }
 }
