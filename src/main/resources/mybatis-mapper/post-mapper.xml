@@ -12,18 +12,18 @@
 
     <!--    전체 카테고리 리스트 가져오기-->
     <select id="findAllCategory" resultType="com.study.week2.vo.CategoryVo">
-        SELECT category_id AS categoryId, category_name AS categoryName
+        SELECT category_id, category_name
         FROM category
     </select>
 
     <!--    게시글 리스트 가져오기-->
     <select id="findAllPostBySearch" parameterType="com.study.week2.vo.SearchVo" resultType="com.study.week2.vo.PostVo">
         SELECT
-            post.post_id AS postId,
-            category.category_name AS categoryName,
+            post.post_id,
+            category.category_name,
             post.name,
             post.title,
-            post.view_count AS viewCount,
+            post.view_count,
             DATE_FORMAT(post.create_date, '%Y%.%m%.%d% %h%:%i') AS createDate,
             DATE_FORMAT(post.update_date, '%Y%.%m%.%d% %h%:%i') AS updateDate,
             post.status,
@@ -54,13 +54,14 @@
     <!--    선택 게시글 가져오기  -->
     <select id="findPostById" parameterType="int" resultType="com.study.week2.vo.PostVo">
         SELECT
-            post.post_id AS postId,
-            category.category_name AS categoryName,
+            post.post_id,
+            post.category_id,
+            category.category_name,
             post.name,
             post.password,
             post.title,
             post.content,
-            post.view_count AS viewCount,
+            post.view_count,
             DATE_FORMAT(post.create_date, '%Y%.%m%.%d% %h%:%i') AS createDate,
             DATE_FORMAT(post.update_date, '%Y%.%m%.%d% %h%:%i') AS updateDate,
             post.status
@@ -87,10 +88,10 @@
     <!--    postId에 해당하는 댓글 리스트로 불러오기  -->
     <select id="findAllCommentByPostId" parameterType="int" resultType="com.study.week2.vo.CommentVo">
         SELECT
-            comment.content,
+            content,
             DATE_FORMAT(comment.create_date, '%Y%.%m%.%d% %h%:%i') AS createDate
-        FROM comment comment
-        WHERE comment.post_id = #{postId}
+        FROM comment
+        WHERE post_id = #{postId}
     </select>
 
     <!--    게시글 삭제 구현 ( state를 0으로 만든다 )   -->
@@ -109,28 +110,47 @@
     <!--    postId에 해당하는 파일 리스트 가져오기   -->
     <select id="findAllFileByPostId" parameterType="int" resultType="com.study.week2.vo.FileVo">
         SELECT
-            file.file_id AS fileId,
-            file.post_id AS postId,
-            file.file_original_name AS fileOriginalName,
-            file.file_name AS fileName,
-            file.file_path AS filePath,
-            file.file_size AS fileSize
+            file_id,
+            post_id,
+            file_original_name,
+            file_name,
+            file_path,
+            file_size
         FROM
-            file file
+            file
         WHERE
-            file.post_id = ${postId}
+            post_id = ${postId} AND status = 1
     </select>
 
     <!--    파일 id에 해당하는 파일 가져오기  -->
     <select id="findFileByFileId" parameterType="int" resultType="com.study.week2.vo.FileVo">
         SELECT
-            file.post_id AS postId,
-            file.file_original_name AS fileOriginalName,
-            file.file_name AS fileName,
-            file.file_path AS filePath
+            post_id,
+            file_original_name,
+            file_name,
+            file_path
         FROM
-            file file
+            file
         WHERE
-            file.file_id = ${fileId}
+            file_id = ${fileId} AND status = 1
     </select>
+
+<!--    게시글 업데이트  -->
+    <update id="updatePost" parameterType="com.study.week2.vo.PostVo">
+        UPDATE post
+        SET category_id = #{categoryId},
+            name = #{name},
+            title = #{title},
+            content = #{content},
+            update_date = NOW()
+        WHERE post_id = #{postId}
+    </update>
+
+    <!--    파일 삭제 구현 ( state를 0으로 만든다 )   -->
+    <update id="deleteFileByFileId" parameterType="int">
+        UPDATE file
+        SET status = 0
+        WHERE file_id = #{fileId}
+    </update>
+
 </mapper>

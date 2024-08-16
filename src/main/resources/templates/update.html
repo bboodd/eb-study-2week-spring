@@ -7,9 +7,10 @@
 </head>
 <body>
 
-<h1 th:text="'자유게시판 - 등록'"></h1><br/>
+<h1 th:text="'자유게시판 - 수정'"></h1><br/>
 
-<form method="post" action="/add/post" enctype="multipart/form-data" th:object="${postDto}">
+<form id="update" method="post" action="/update" enctype="multipart/form-data" th:object="${postDto}">
+    <input type="hidden" th:field="${postDto.postId}">
     <p>
         <label>Category:
             <select name="categoryId" id="categoryId" th:field="${postDto.categoryId}">
@@ -23,6 +24,27 @@
     </p>
 
     <p>
+        <label>create:
+            <input type="hidden" th:field="${postDto.createDate}">
+            <p th:text="${postDto.createDate}"></p>
+        </label>
+    </p>
+
+    <p>
+        <label>update:
+            <input type="hidden" th:field="${postDto.updateDate}">
+            <p th:text="${postDto.updateDate}"></p>
+        </label>
+    </p>
+
+    <p>
+        <label>viewCount:
+            <input type="hidden" th:field="${postDto.viewCount}">
+            <p th:text="${postDto.viewCount}"></p>
+        </label>
+    </p>
+
+    <p>
         <label>Name:
             <input type="text" name="name" id="name" th:field="${postDto.name}"><br />
             <div class="field-error" th:errors="*{name}"></div>
@@ -31,32 +53,39 @@
 
     <p>
         <label>Password:
-            <input type="password" name="password" id="password" th:field="${postDto.password}"><br />
+            <input type="password" name="password" id="password" placeholder="비밀번호"><br />
             <div class="field-error" th:errors="*{password}"></div>
         </label>
     </p>
-    <p>
-        <label>CheckPassword:
-            <input type="password" name="checkPassword" id="checkPassword" th:field="${postDto.checkPassword}"><br />
-            <div class="field-error" th:errors="*{checkPassword}"></div>
-        </label>
-    </p>
+
     <p>
         <label>Title:
             <input type="text" name="title" id="title" th:field="${postDto.title}"><br />
             <div class="field-error" th:errors="*{title}"></div>
         </label>
     </p>
+
     <p>
         <label>Content:
             <input type="text" name="content" id="content" th:field="${postDto.content}"><br />
             <div class="field-error" th:errors="*{content}"></div>
         </label>
     </p>
+
     <p>
         <label>File:
             <div id="preview">
                 <!-- File preview will be updated here -->
+                <th:block th:if="${fileList != null}">
+                    <th:block th:each="file : ${fileList}">
+                        <div>
+                            <p th:text="${file.fileOriginalName}"></p>
+                            <button th:onclick="|loaction.href='@{/download/{fileId}(fileId=${file.fileId})}'|">download</button>
+                            <button th:attr="data-id=${file.fileId}" class="add-remove-file-list">X</button>
+                        </div>
+                    </th:block>
+                </th:block>
+
             </div>
             <p>
                 <input type="file" name="files" id="file-input" multiple />
@@ -64,8 +93,11 @@
         </label>
     </p>
     <div>
+        <div id="remove-file-list">
+
+        </div>
         <p>
-            <button type="submit">등록</button>
+            <button type="submit">수정</button>
         </p>
     </div>
 </form>
@@ -73,6 +105,8 @@
 <script>
     const fileInput = $('#file-input');
     const preview = $('#preview');
+
+    let removeFileList = [];
 
     // 파일 추가
     $(document).on('change', fileInput, (e) => {
@@ -107,6 +141,30 @@
 
         removeTarget.remove();
     });
+
+    $(document).on('click', '.add-remove-file-list', (e) => {
+        e.preventDefault();
+
+        const fileId = e.target.dataset.id;
+
+        console.log(removeFileList);
+
+        if(!removeFileList.includes(fileId)){
+            removeFileList.push(fileId);
+            $(e.target).parent().css("opacity", "0.5");
+        } else {
+            removeFileList = removeFileList.filter((element) => element !== fileId);
+            $(e.target).parent().css("opacity", "1");
+        }
+        console.log(removeFileList);
+    });
+
+    $(document).on('submit', '#update', (e) => {
+        removeFileList.forEach((element) => {
+            let add = `<input type="hidden" name="removeFileList" value="` + element + `">`;
+            $('#remove-file-list').append(add);
+        })
+    })
 </script>
 
 </body>

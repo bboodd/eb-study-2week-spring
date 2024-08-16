@@ -26,7 +26,7 @@
                     <!-- 카테고리 테이블에서 출력 -->
                     <select name="categoryId" id="categoryId">
                         <option value="0">전체 카테고리</option>
-                        <th:block th:if="${categoryList.size() > 0}">
+                        <th:block th:if="${categoryList != null}">
                             <th:block th:each="category : ${categoryList}">
                                 <option th:value="${category.categoryId}" th:text="${category.categoryName}"></option>
                             </th:block>

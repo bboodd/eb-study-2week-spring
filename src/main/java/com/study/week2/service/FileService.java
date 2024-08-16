@@ -157,4 +157,9 @@ public class FileService {
         FileDto result = toDto(postMapper.findFileByFileId(fileId));
         return result;
     }
+
+    public int deleteFile(int fileId){
+        int result = postMapper.deleteFileByFileId(fileId);
+        return result;
+    }
 }

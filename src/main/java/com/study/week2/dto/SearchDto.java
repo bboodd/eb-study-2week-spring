@@ -15,7 +15,7 @@ public class SearchDto {
 
     private String endDate = "";
 
-    private String categoryId = "0";
+    private int categoryId = 0;
 
     private String keyword = "";
 

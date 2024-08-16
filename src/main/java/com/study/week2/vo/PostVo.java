@@ -43,7 +43,8 @@ public class PostVo {
 
     public static PostVo toVo(PostDto postDto){
         PostVo postVo = PostVo.builder()
-                .categoryId(Integer.parseInt(postDto.getCategoryId()))
+                .postId(postDto.getPostId())
+                .categoryId(postDto.getCategoryId())
                 .name(postDto.getName())
                 .password(postDto.getPassword())
                 .title(postDto.getTitle())

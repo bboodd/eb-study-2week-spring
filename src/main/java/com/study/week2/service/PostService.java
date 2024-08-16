@@ -124,4 +124,9 @@ public class PostService {
         return result;
     }
 
+    public int updatePost(PostVo postVo) {
+        int result = postMapper.updatePost(postVo);
+        return result;
+    }
+
 }

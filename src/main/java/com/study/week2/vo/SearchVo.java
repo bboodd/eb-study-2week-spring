@@ -28,7 +28,7 @@ public class SearchVo {
         SearchVo searchVo = SearchVo.builder()
                 .startDate(searchDto.getStartDate())
                 .endDate(searchDto.getEndDate())
-                .categoryId(Integer.parseInt(searchDto.getCategoryId()))
+                .categoryId(searchDto.getCategoryId())
                 .keyword(searchDto.getKeyword())
                 .build();
         return searchVo;

@@ -14,9 +14,7 @@ public class PostDto {
 
     int postId;
 
-    @NotBlank(message = "카테고리를 입력해주세요.")
-    @Pattern(regexp = "[0-9]", message = "카테고리를 확인해주세요.")
-    String categoryId;
+    int categoryId;
 
     String categoryName;
 
@@ -48,6 +46,8 @@ public class PostDto {
 
     int fileCount;
 
+    int[] removeFileList;
+
     /**
      * vo객체를 dto객체로
      * db에서 받아서 화면으로 넘길때
@@ -58,6 +58,7 @@ public class PostDto {
     public static PostDto toDto(PostVo postVo){
         PostDto postDto = PostDto.builder()
                 .postId(postVo.getPostId())
+                .categoryId(postVo.getCategoryId())
                 .categoryName(postVo.getCategoryName())
                 .name(postVo.getName())
                 .password(postVo.getPassword())

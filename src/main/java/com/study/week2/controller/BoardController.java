@@ -15,8 +15,10 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -60,7 +62,9 @@ public class BoardController {
         model.addAttribute("postDto", postDto);
         model.addAttribute("commentList", commentList);
         model.addAttribute("fileList", fileList);
-
+        if(!model.containsAttribute("commentDto")){
+            model.addAttribute("commentDto", new CommentDto());
+        }
         log.info("post : " + postDto);
 
         return "post";
@@ -71,35 +75,38 @@ public class BoardController {
     public String savePage(Model model) {
         List<CategoryDto> categoryList = postService.getCategories();
         model.addAttribute("categoryList", categoryList);
-        model.addAttribute("postDto", new PostDto());
+
+        if(!model.containsAttribute("postDto")){
+            model.addAttribute("postDto", new PostDto());
+        }
         return "add";
     }
 
 //    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/add/post")
-    public String savePost(@Valid PostDto postDto,
+    public String savePost(@Valid PostDto postDto,BindingResult bindingResult,
                            @RequestParam(value = "files", required = false)List<MultipartFile> files,
-                           Model model,
-                           BindingResult bindingResult) throws IOException {
+                           Model model) throws IOException {
 
-        if(bindingResult.hasErrors()){
+        if(bindingResult.hasErrors() || !postDto.getPassword().equals(postDto.getCheckPassword())){
+            if(!postDto.getPassword().equals(postDto.getCheckPassword())) {
+                bindingResult.rejectValue("checkPassword", "equal", "입력한 비밀번호와 다릅니다.");
+            }
             model.addAttribute("postDto", postDto);
-            return "add";
+            return "redirect:/add";
         }
 
-        //TODO:비밀번호 확인로직은 서비스에서, 글로벌 예외 컨트롤러
+        //TODO:글로벌 예외 컨트롤러 // 비밀번호 체크 서비스에서? x 서비스에서는 db정보랑 비교
 
-        int resultId = 0;
-        if(postDto.getPassword().equals(postDto.getCheckPassword())){
-            resultId = postService.savePost(toVo(postDto));
+        int resultId = postService.savePost(toVo(postDto));
 
-            if(files != null){
-                int fileResult = 0;
-                for(MultipartFile file : files){
-                    fileResult += fileService.uploadFile(resultId, file);
-                }
-                log.info("등록된 파일 개수: " + fileResult);
+        if(files != null){
+            int fileResult = 0;
+            for(MultipartFile file : files){
+                if(file.getOriginalFilename() == null || file.getOriginalFilename().isBlank()) continue;
+                fileResult += fileService.uploadFile(resultId, file);
             }
+            log.info("등록된 파일 개수: " + fileResult);
         }
 
         return "redirect:/";
@@ -107,12 +114,19 @@ public class BoardController {
 
 //    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/post/add/comment")
-    public String saveComment(@Valid CommentDto commentDto){
+    public String saveComment(@Valid CommentDto commentDto,
+                              BindingResult bindingResult,
+                              Model model,
+                              RedirectAttributes ra){
 
         int postId = commentDto.getPostId();
 
-        postService.saveComment(toVo(commentDto));
+        if(bindingResult.hasErrors()){
+            ra.addFlashAttribute("commentDto", commentDto);
+        } else{
+            postService.saveComment(toVo(commentDto));
 
+        }
         return "redirect:/post/"+postId;
     }
 
@@ -161,5 +175,74 @@ public class BoardController {
         } else{
             return "redirect:/post/"+postId;
         }
+    }
+
+    @PostMapping("/check")
+    public String updatePassCheck(@RequestParam int postId,
+                             @RequestParam String inputPassword) {
+        boolean success = false;
+        String correctPassword = postService.getPost(postId).getPassword();
+        if(!inputPassword.isBlank() && inputPassword.equals(correctPassword)){
+            success = true;
+        }
+        if(success){
+            return "redirect:/update/"+postId;
+        } else{
+            return "redirect:/post/"+postId;
+        }
+    }
+
+    @GetMapping("/update/{postId}")
+    public String getUpdate(@PathVariable int postId, Model model) {
+        PostDto postDto = postService.getPost(postId);
+        List<FileDto> fileList = fileService.getFiles(postId);
+        List<CategoryDto> categoryList = postService.getCategories();
+
+        if(!model.containsAttribute("postDto")){
+            model.addAttribute("postDto", postDto);
+        }
+        model.addAttribute("fileList", fileList);
+        model.addAttribute("categoryList", categoryList);
+
+        return "update";
+    }
+
+    @PostMapping("/update")
+    public String updatePost(@Valid PostDto postDto, BindingResult bindingResult,
+                             @RequestParam(value = "files", required = false)List<MultipartFile> files,
+                             Model model, RedirectAttributes ra) throws IOException {
+
+        int postId = postDto.getPostId();
+        String correctPassword = postService.getPost(postId).getPassword();
+
+        if(bindingResult.hasErrors() || !postDto.getPassword().equals(correctPassword)){
+            if(!postDto.getPassword().equals(correctPassword)){
+                bindingResult.rejectValue("password", "equal", "입력한 비밀번호와 다릅니다.");
+            }
+            ra.addFlashAttribute("postDto", postDto);
+            return "redirect:/update/"+postId;
+        }
+
+        postService.updatePost(toVo(postDto));
+
+        if(files != null){
+            int fileResult = 0;
+            for(MultipartFile file : files){
+                if(file.getOriginalFilename() == null || file.getOriginalFilename().isBlank()) continue;
+                fileResult += fileService.uploadFile(postId, file);
+            }
+            log.info("등록된 파일 개수: " + fileResult);
+        }
+
+        int[] removeFileList = postDto.getRemoveFileList();
+        if(removeFileList != null){
+            int fileResult = 0;
+            for(int fileId : removeFileList){
+                fileResult += fileService.deleteFile(fileId);
+            }
+            log.info("삭제된 파일 개수 : " + fileResult);
+        }
+
+        return "redirect:/post/"+postId;
     }
 }
