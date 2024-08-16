@@ -29,4 +29,8 @@ public interface PostMapper {
     FileVo findFileByFileId(int fileId);
 
     int increaseViewCountById(int postId);
+
+    int updatePost(PostVo postVo);
+
+    int deleteFileByFileId(int fileId);
 }
