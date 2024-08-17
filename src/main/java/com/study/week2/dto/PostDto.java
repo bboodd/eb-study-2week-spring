@@ -6,6 +6,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
 @Data
@@ -38,9 +41,9 @@ public class PostDto {
 
     int viewCount;
 
-    String createDate;
+    LocalDateTime createDate;
 
-    String updateDate;
+    LocalDateTime updateDate;
 
     int status;
 
@@ -60,7 +63,7 @@ public class PostDto {
                 .postId(postVo.getPostId())
                 .categoryId(postVo.getCategoryId())
                 .categoryName(postVo.getCategoryName())
-                .name(postVo.getName())
+                .name(postVo.getWriter())
                 .password(postVo.getPassword())
                 .title(postVo.getTitle())
                 .content(postVo.getContent())
@@ -70,9 +73,6 @@ public class PostDto {
                 .fileCount(postVo.getFileCount())
                 .status(postVo.getStatus())
                 .build();
-        if(postVo.getCreateDate().equals(postVo.getUpdateDate())){
-            postDto.setUpdateDate("-");
-        }
         return postDto;
     }
 }
