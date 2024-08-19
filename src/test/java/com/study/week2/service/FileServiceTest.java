@@ -44,7 +44,7 @@ class FileServiceTest {
         given(postMapper.findAllFileByPostId(anyInt())).willReturn(fileList);
 
         //when
-        List<FileDto> result = fileService.getFiles(1);
+        List<FileDto> result = fileService.findAllFileByPostId(1);
 
         //then
         assertThat(result.size()).isEqualTo(2);
@@ -56,10 +56,10 @@ class FileServiceTest {
         //given
         FileVo fileVo1 = FileVo.builder().fileId(1).postId(1).fileName("uuid")
                 .fileOriginalName("파일이름").filePath("파일경로").fileSize(1024).build();
-        given(postMapper.findFileByFileId(anyInt())).willReturn(fileVo1);
+        given(postMapper.findFileById(anyInt())).willReturn(fileVo1);
 
         //when
-        FileDto result = fileService.getFile(1);
+        FileDto result = fileService.findFileById(1);
 
         //then
         assertThat(result.getFileOriginalName()).isEqualTo(fileVo1.getFileOriginalName());

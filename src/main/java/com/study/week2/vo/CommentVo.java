@@ -2,6 +2,8 @@ package com.study.week2.vo;
 import com.study.week2.dto.CommentDto;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Value
 //객체 외부 생성 제한
@@ -15,7 +17,7 @@ public class CommentVo {
 
     private String content;
 
-    private String createDate;
+    private LocalDateTime createDate;
 
     /**
      * dto를 vo로

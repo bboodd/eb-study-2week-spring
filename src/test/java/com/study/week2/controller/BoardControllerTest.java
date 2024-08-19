@@ -2,6 +2,8 @@ package com.study.week2.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.study.week2.dto.SearchDto;
+import com.study.week2.dto.request.PostRequestDto;
+import com.study.week2.service.FileService;
 import com.study.week2.vo.PostVo;
 import com.study.week2.vo.SearchVo;
 import com.study.week2.service.PostService;
@@ -16,11 +18,17 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.BDDMockito.then;
+
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class BoardControllerTest {
@@ -30,6 +38,9 @@ class BoardControllerTest {
 
     @Mock
     PostService postService;
+
+    @Mock
+    FileService fileService;
 
     MockMvc mockMvc;
     ObjectMapper objectMapper = new ObjectMapper();
@@ -47,7 +58,7 @@ class BoardControllerTest {
                 .keyword("")
                 .endDate("")
                 .startDate("")
-                .categoryId("0").build();
+                .categoryId(0).build();
 
         //when
         mockMvc.perform(
@@ -56,7 +67,7 @@ class BoardControllerTest {
                 .andDo(print());
 
         //then
-        then(postService).should().getPosts(SearchVo.toVo(searchDto));
+        then(postService).should().findAllPostBySearch(SearchVo.toVo(searchDto));
     }
 
     @Test
@@ -71,23 +82,29 @@ class BoardControllerTest {
                 .andDo(print());
 
         //then
-        then(postService).should().getPost(1);
+        then(postService).should().findPostById(1);
     }
 
+    //TODO:mockMvc 에서 post로 값을 넣어주면 controller에서 null 반환함 해결필요
     @Test
     @DisplayName("게시글 작성 테스트")
     void post_save() throws Exception {
         //given
         PostVo postVo = PostVo.builder()
-                .categoryId(1).name("이름").password("qwer1234!")
+                .categoryId(1).writer("이름").password("qwer1234!")
                 .title("제목").content("내용").build();
+        PostRequestDto postRequestDto = PostRequestDto.builder()
+                .categoryId(1).writer("이름").password("qwer1234!")
+                .title("제목").content("내용").checkPassword("qwer1234!").build();
 
         //when
         mockMvc.perform(
-                post("/add/post")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postVo)))
-                .andExpect(status().isCreated());
+                post("/write/post")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .flashAttr("postRequestDto", postRequestDto))
+//                        .content(objectMapper.writeValueAsString(postRequestDto)))
+                .andExpect(status().is3xxRedirection())
+                .andDo(print());
 
         //then
         then(postService).should().savePost(postVo);

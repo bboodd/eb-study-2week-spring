@@ -76,7 +76,7 @@
                             <td th:text="${post.categoryName}"></td>
                             <td th:text="${post.fileCount} == 0 ? ' ' : '파일o' "></td>
                             <td th:onclick="|location.href='post/${post.postId}'|" th:text="${post.title}"></td>
-                            <td th:text="${post.name}"></td>
+                            <td th:text="${post.writer}"></td>
                             <td th:text="${post.viewCount}"></td>
                             <td th:text="${post.createDate}"></td>
                             <td th:text="${post.updateDate}"></td>
@@ -89,6 +89,6 @@
     </div>
 </section>
 
-<button onclick="location.href='/add'">등록</button>
+<button onclick="location.href='/post/write'">등록</button>
 </body>
 </html>

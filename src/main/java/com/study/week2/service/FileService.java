@@ -45,7 +45,7 @@ public class FileService {
      * @throws IOException
      */
 
-    public int uploadFile(int postId, MultipartFile file) throws IOException {
+    public int uploadAndSaveFile(int postId, MultipartFile file) throws IOException {
 
         String originalName = file.getOriginalFilename();
 
@@ -81,55 +81,8 @@ public class FileService {
      */
 
     public int saveFile(FileVo fileVo){
-        int result = postMapper.insertFile(fileVo);
+        int result = postMapper.saveFile(fileVo);
         return result;
-    }
-
-    /**
-     * 파일 다운로드
-     * @param fileId
-     * @param request
-     * @param response
-     * @throws Exception
-     */
-
-
-    //레거시 다운로드 로직
-    public void downloadFile(int fileId, HttpServletRequest request, HttpServletResponse response) throws Exception{
-        //TODO: 버퍼인풋스트림, 버퍼아웃풋스트림도 있음
-        FileDto fileDto = getFile(fileId);
-
-        String originalName = fileDto.getFileOriginalName();
-        String fileName = fileDto.getFileName();
-
-        String path = filePath + fileName;
-        @Cleanup
-        FileInputStream fis = new FileInputStream(path);
-
-        String mimeType = request.getServletContext().getMimeType(originalName);
-        if(mimeType == null){
-            mimeType = "application/octet-stream";
-        }
-        response.setContentType(mimeType);
-
-        String encodeFileName = URLEncoder.encode(originalName, StandardCharsets.UTF_8);
-
-        response.setHeader("Content-Disposition", "attachment; filename=" + encodeFileName);
-
-        byte[] buffer = new byte[4096];
-        int readBytes = 0;
-
-        @Cleanup
-        ServletOutputStream sos = response.getOutputStream();
-
-        while((readBytes = fis.read(buffer)) != -1) {
-            sos.write(buffer, 0, readBytes);
-        }
-
-        fis.close();
-        sos.flush();
-
-        //TODO: finaly 에서 fis닫기
     }
 
     /**
@@ -138,7 +91,7 @@ public class FileService {
      * @return
      */
 
-    public List<FileDto> getFiles(int postId){
+    public List<FileDto> findAllFileByPostId(int postId){
         List<FileVo> fileList = postMapper.findAllFileByPostId(postId);
 
         List<FileDto> result = fileList.stream()
@@ -152,14 +105,14 @@ public class FileService {
      * @return
      */
 
-    public FileDto getFile(int fileId){
-        FileVo fileVo = postMapper.findFileByFileId(fileId);
-        FileDto result = toDto(postMapper.findFileByFileId(fileId));
+    public FileDto findFileById(int fileId){
+        FileVo fileVo = postMapper.findFileById(fileId);
+        FileDto result = toDto(fileVo);
         return result;
     }
 
     public int deleteFile(int fileId){
-        int result = postMapper.deleteFileByFileId(fileId);
+        int result = postMapper.deleteFileById(fileId);
         return result;
     }
 }
