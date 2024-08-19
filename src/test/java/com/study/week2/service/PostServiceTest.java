@@ -1,9 +1,11 @@
 package com.study.week2.service;
 
+import com.study.week2.dto.SearchDto;
+import com.study.week2.dto.response.CommentResponseDto;
+import com.study.week2.dto.response.PagingResponse;
 import com.study.week2.dto.response.PostResponseDto;
 import com.study.week2.mapper.PostMapper;
 import com.study.week2.dto.CategoryDto;
-import com.study.week2.dto.CommentDto;
 import com.study.week2.vo.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -84,7 +86,7 @@ class PostServiceTest {
     @DisplayName("게시글 다건 조회 서비스 테스트")
     void get_posts() {
         //given
-        SearchVo searchVo = SearchVo.builder().categoryId(0).startDate("").endDate("").keyword("").build();
+        SearchDto searchDto = SearchDto.builder().categoryId(0).startDate("").endDate("").keyword("").build();
         List<PostVo> postList = new ArrayList<>();
         PostVo postVo1 = PostVo.builder().categoryId(1).writer("이름").password("qwer1234!")
                 .title("제목").content("내용").build();
@@ -93,13 +95,13 @@ class PostServiceTest {
         postList.add(postVo1);
         postList.add(postVo2);
 
-        given(postMapper.findAllPostBySearch(searchVo)).willReturn(postList);
+        given(postMapper.findAllPostBySearch(SearchVo.toVo(searchDto))).willReturn(postList);
 
         //when
-        List<PostResponseDto> result = postService.findAllPostBySearch(searchVo);
+        PagingResponse<PostResponseDto> result = postService.findAllPostBySearch(searchDto);
 
         //then
-        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.getList().size()).isEqualTo(2);
     }
 
     @Test
@@ -115,7 +117,7 @@ class PostServiceTest {
         given(postMapper.findAllCommentByPostId(anyInt())).willReturn(commentList);
 
         //when
-        List<CommentDto> result = postService.findAllCommentByPostId(1);
+        List<CommentResponseDto> result = postService.findAllCommentByPostId(1);
 
         //then
         assertThat(result.size()).isEqualTo(2);

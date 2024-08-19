@@ -41,39 +41,32 @@
         </tr>
 
 
-<!--        &lt;!&ndash; 저장된 파일 &ndash;&gt;-->
-<!--        <div>-->
-<!--          <th:block th:if="${fileList != null}">-->
-<!--            <th:block th:each="file : ${fileList}">-->
-<!--              <a th:href="@{/download/{fileId}(fileId=${file.fileId})}"-->
-<!--                 th:text="${file.fileOriginalName}"></a><br />-->
-<!--            </th:block>-->
-<!--          </th:block>-->
-<!--        </div>-->
+        <!-- 저장된 파일 -->
+        <th scope="row">파일</th>
+        <td colspan="3" th:if="${fileList != null}" th:each="file : ${fileList}">
+          <a th:href="@{/download/{fileId}(fileId=${file.fileId})}"
+             th:text="${file.fileOriginalName}"></a>
+        </td>
 
-<!--        &lt;!&ndash; 댓글 &ndash;&gt;-->
-<!--        <div>-->
-<!--          <th:block th:if="${commentList != null}">-->
-<!--            <th:block th:each="comment : ${commentList}">-->
-<!--              <div>-->
-<!--                <p th:text="${comment.createDate}"></p>-->
-<!--                <p th:text="${comment.content}"></p>-->
-<!--              </div>-->
-<!--            </th:block>-->
-<!--          </th:block>-->
-
-<!--          &lt;!&ndash; 댓글 추가 &ndash;&gt;-->
-<!--          <form method="post" action="add/comment" th:object="${commentDto}">-->
-<!--            <input type="text" name="content" th:field="${commentDto.content}" placeholder="댓글을 입력해 주세요." />-->
-<!--            <div class="field-error" th:errors="*{content}"></div>-->
-<!--            <th:block th:if="${postDto != null}">-->
-<!--              <input type="hidden" name="postId" th:value="${postDto.postId}" />-->
-<!--            </th:block>-->
-<!--            <button type="submit">등록</button>-->
-<!--          </form>-->
-<!--        </div>-->
         </tbody>
       </table>
+
+      <!--/* 댓글 렌더링 영역 */-->
+      <div class="cm_list">
+
+      </div>
+
+      <!--/* 댓글 작성 */-->
+      <div class="cm_write">
+        <fieldset>
+          <legend class="skipinfo">댓글 입력</legend>
+          <div class="cm_input">
+            <p><textarea id="content" name="content" onkeyup="countingLength(this);" cols="90" rows="4" placeholder="댓글을 입력해 주세요."></textarea></p>
+            <span><button type="button" class="btns" onclick="saveComment();">등 록</button> <i id="counter">0/300자</i></span>
+          </div>
+        </fieldset>
+      </div>
+
       <p class="btn_set">
         <button type="button" onclick="goWritePage();" class="btns btn_bdr4 btn_mid">수정</button>
         <button type="button" onclick="deletePost();" class="btns btn_bdr1 btn_mid">삭제</button>
@@ -81,11 +74,39 @@
       </p>
     </section>
   </div> <!--/* .content */-->
+
+  <!--/* 댓글 수정 popup */-->
+  <div id="commentUpdatePopup" class="popLayer">
+    <h3>댓글 수정</h3>
+    <div class="pop_container">
+      <table class="tb tb_row tl">
+        <colgroup>
+          <col style="width:30%;" /><col style="width:70%;" />
+        </colgroup>
+        <tbody>
+        <tr>
+          <th scope="row">내용<span class="es">필수 입력</span></th>
+          <td><textarea id="modalContent" name="modalContent" cols="90" rows="10" placeholder="수정할 내용을 입력해 주세요."></textarea></td>
+        </tr>
+        </tbody>
+      </table>
+      <p class="btn_set">
+        <button type="button" id="commentUpdateBtn" onclick="" class="btns btn_st2">수정</button>
+        <button type="button" class="btns btn_bdr2" onclick="closeCommentUpdatePopup();">취소</button>
+      </p>
+    </div>
+    <button type="button" class="btn_close" onclick="closeCommentUpdatePopup();"><span><i class="far fa-times-circle"></i></span></button>
+  </div>
 </th:block>
 
 <th:block layout:fragment="script">
   <script th:inline="javascript">
     /*<![CDATA[*/
+
+    window.onload = () => {
+      findAllComment();
+    }
+
 
     // 게시글 삭제
     function deletePost() {
@@ -127,6 +148,139 @@
       const queryString = new URLSearchParams(location.search);
       queryString.delete('postId');
       location.href = '/' + '?' + queryString.toString();
+    }
+
+    // 전체 댓글 조회
+    function findAllComment() {
+
+      const postId = [[ ${postDto.postId} ]];
+
+      $.ajax({
+        url : `/posts/${postId}/comments`,
+        type : 'get',
+        dataType : 'json',
+        async : false,
+        success : function (response) {
+
+          // 1. 조회된 데이터가 없는 경우
+          if ( !response.length ) {
+            document.querySelector('.cm_list').innerHTML = '<div class="cm_none"><p>등록된 댓글이 없습니다.</p></div>';
+            return false;
+          }
+
+          // 2. 렌더링 할 HTML을 저장할 변수
+          let commentHtml = '';
+
+          // 3. 댓글 HTML 추가
+          response.forEach(row => {
+            commentHtml += `
+                        <div>
+                            <span class="writer_img"><img src="/images/default_profile.png" width="30" height="30" alt="기본 프로필 이미지"/></span>
+                            <p class="writer">
+                                <span class="date">${dayjs(row.createdDate).format('YYYY.MM.DD HH:mm')}</span>
+                            </p>
+                            <div class="cont"><div class="txt_con">${row.content}</div></div>
+                                <p class="func_btns">
+                                    <button type="button" onclick="openCommentUpdatePopup(${row.commentId});" class="btns"><span class="icons icon_modify">수정</span></button>
+                                        <button type="button" onclick="deleteComment(${row.commentId});" class="btns"><span class="icons icon_del">삭제</span></button>
+                                </p>
+                        </div>
+                    `;
+          })
+
+          // 4. class가 "cm_list"인 요소를 찾아 HTML을 렌더링
+          document.querySelector('.cm_list').innerHTML = commentHtml;
+        },
+        error : function (request, status, error) {
+          console.log(error)
+        }
+      })
+    }
+
+    // 댓글 길이 카운팅
+    function countingLength(content) {
+      if (content.value.length > 300) {
+        alert('댓글을 300자 이하로 입력해 주세요.');
+        content.value = content.value.substring(0, 300);
+        content.focus();
+      }
+      document.getElementById('counter').innerText = content.value.length + '/300자';
+    }
+
+
+    // 댓글 저장
+    function saveComment() {
+
+      const content = document.getElementById('content');
+      isValid(content, '댓글');
+
+      const postId = [[ ${postDto.postId} ]];
+      const uri = `/posts/${postId}/comments`;
+      const params = {
+        postId : postId,
+        content : content.value
+      }
+
+      callApi(uri, 'post', params);
+      alert('등록되었습니다.');
+      content.value = '';
+      document.getElementById('counter').innerText = '0/300자';
+      findAllComment();
+
+    }
+
+    // 댓글 수정 팝업 open
+    function openCommentUpdatePopup(commentId) {
+
+      const postId = [[ ${postDto.postId} ]];
+      const uri = `/posts/${postId}/comments/${commentId}`;
+      const response = getJson(uri);
+      document.getElementById('modalWriter').value = response.writer;
+      document.getElementById('modalContent').value = response.content;
+      document.getElementById('commentUpdateBtn').setAttribute('onclick', `updateComment(${id})`);
+      layerPop('commentUpdatePopup');
+    }
+
+
+    // 댓글 수정 팝업 close
+    function closeCommentUpdatePopup() {
+      document.querySelectorAll('#modalContent, #modalWriter').forEach(element => element.value = '');
+      document.getElementById('commentUpdateBtn').removeAttribute('onclick');
+      layerPopClose('commentUpdatePopup');
+    }
+
+    // 댓글 수정
+    function updateComment(commentId) {
+
+      const content = document.getElementById('modalContent');
+      isValid(content, '수정할 내용');
+
+      const postId = [[ ${postDto.postId} ]];
+      const uri = `/posts/${postId}/comments/${commentId}`;
+      const params = {
+        commentId : commentId,
+        postId : postId,
+        content : content.value
+      }
+
+      callApi(uri, 'patch', params);
+      alert('수정되었습니다.');
+      closeCommentUpdatePopup();
+      findAllComment();
+    }
+
+    // 댓글 삭제
+    function deleteComment(commentId) {
+
+      if ( !confirm('선택하신 댓글을 삭제할까요?') ) {
+        return false;
+      }
+
+      const postId = [[ ${postDto.postId} ]];
+      const uri = `/posts/${postId}/comments/${commentId}`;
+      callApi(uri, 'delete');
+      alert('삭제되었습니다.');
+      findAllComment();
     }
 
     /*]]>*/

@@ -41,6 +41,7 @@
         , post_id
         , content
         , create_date
+        , status
     </sql>
 
 <!--    검색 조건   -->
@@ -157,6 +158,17 @@
         )
     </insert>
 
+<!--    id에 해당하는 댓글 찾기   -->
+    <select id="findCommentById" parameterType="int" resultType="com.study.week2.vo.CommentVo">
+        SELECT
+            <include refid="commentColumns"></include>
+        FROM
+            comment
+        WHERE
+            comment_id = #{commentId}
+            AND status = 1
+    </select>
+
     <!--    postId에 해당하는 댓글 리스트로 불러오기  -->
     <select id="findAllCommentByPostId" parameterType="int" resultType="com.study.week2.vo.CommentVo">
         SELECT
@@ -165,7 +177,30 @@
             comment
         WHERE
             post_id = #{postId}
+            AND status = 1
+        ORDER BY
+            comment_id ASC
     </select>
+
+<!--    댓글 수정   -->
+    <update id="updateComment" parameterType="com.study.week2.vo.CommentVo">
+        UPDATE
+            comment
+        SET
+            content = #{content}
+        WHERE
+            comment_id = #{commentId}
+    </update>
+
+<!--    댓글 삭제   -->
+    <update id="deleteCommentById" parameterType="int">
+        UPDATE
+            comment
+        SET
+            status = 0
+        WHERE
+            comment_id = #{commentId}
+    </update>
 
     <!--    게시글 삭제 구현 ( state를 0으로 만든다 )   -->
     <update id="deletePostById" parameterType="int">
