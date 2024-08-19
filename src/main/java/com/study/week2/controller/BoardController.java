@@ -2,6 +2,7 @@ package com.study.week2.controller;
 
 import com.study.week2.dto.*;
 import com.study.week2.dto.request.PostRequestDto;
+import com.study.week2.dto.response.PagingResponse;
 import com.study.week2.dto.response.PostResponseDto;
 import com.study.week2.service.FileService;
 import com.study.week2.service.PostService;
@@ -25,7 +26,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.study.week2.vo.CommentVo.toVo;
 import static com.study.week2.vo.PostVo.toVo;
@@ -44,13 +47,14 @@ public class BoardController {
     public String getPosts(SearchDto searchDto, Model model) {
 
         List<CategoryDto> categoryList = postService.findAllCategory();
-        List<PostResponseDto> postList = postService.findAllPostBySearch(SearchVo.toVo(searchDto));
+        PagingResponse<PostResponseDto> response = postService.findAllPostBySearch(searchDto);
 
         model.addAttribute("categoryList", categoryList);
-        model.addAttribute("postList", postList);
+        model.addAttribute("response", response);
         model.addAttribute("searchDto", searchDto);
 
         return "list";
+
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -150,7 +154,7 @@ public class BoardController {
     @PostMapping("/post/update")
     public String updatePost(@Valid PostRequestDto postRequestDto, BindingResult bindingResult,
                              @RequestParam(value = "files", required = false)List<MultipartFile> files,
-                             Model model, RedirectAttributes ra) throws IOException {
+                             SearchDto searchDto, Model model, RedirectAttributes ra) throws IOException {
 
         int postId = postRequestDto.getPostId();
         String correctPassword = postService.findPostPasswordById(postId);
@@ -158,7 +162,7 @@ public class BoardController {
                 .message("게시글 수정이 완료되었습니다.")
                 .redirectUri("/")
                 .method(RequestMethod.GET)
-                .data(null)
+                .data(queryParamsToMap(searchDto))
                 .build();
 
         if(bindingResult.hasErrors() || !postRequestDto.getPassword().equals(correctPassword)){
@@ -249,32 +253,38 @@ public class BoardController {
 
 //    @ResponseStatus(HttpStatus.OK)
     @PostMapping("/post/delete")
-    public String deletePost(@RequestParam int postId, Model model) {
-        boolean success = false;
+    public String deletePost(@RequestParam int postId, SearchDto searchDto, Model model) {
+
         int result = postService.deletePostById(postId);
 
         MessageDto message = MessageDto.builder()
                 .message("게시글 삭제이 완료되었습니다.")
                 .redirectUri("/")
                 .method(RequestMethod.GET)
-                .data(null)
+                .data(queryParamsToMap(searchDto))
                 .build();
 
-        if(result != 0){
-            success = true;
-        }
+        return showMessageAndRedirect(message, model);
 
-        if(success){
-            return showMessageAndRedirect(message, model);
-        } else{
-            return "redirect:/post/"+postId;
-        }
     }
 
     //사용자에게 메시지를 전달하고, 페이지를 리다이렉트 한다.
     private String showMessageAndRedirect(MessageDto messageDto, Model model){
         model.addAttribute("params", messageDto);
         return "common/messageRedirect";
+    }
+
+    // 쿼리 스트링 파라미터를 Map에 담아 반환
+    private Map<String, Object> queryParamsToMap(final SearchDto queryParams) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("page", queryParams.getPage());
+        data.put("recordSize", queryParams.getRecordSize());
+        data.put("pageSize", queryParams.getPageSize());
+        data.put("keyword", queryParams.getKeyword());
+        data.put("categoryId", queryParams.getCategoryId());
+        data.put("startDate", queryParams.getStartDate());
+        data.put("endDate", queryParams.getEndDate());
+        return data;
     }
 
 }

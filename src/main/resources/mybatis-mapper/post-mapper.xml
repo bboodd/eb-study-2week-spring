@@ -99,7 +99,18 @@
         FROM
             post
         <include refid="search"></include>
-        ORDER BY post_id DESC
+        ORDER BY
+            post_id DESC
+        LIMIT #{pagination.limitStart}, #{recordSize}
+    </select>
+
+<!--    게시글 수 카운팅   -->
+    <select id="count" parameterType="com.study.week2.vo.SearchVo" resultType="int">
+        SELECT
+            COUNT(*)
+        FROM
+            post
+        <include refid="search"></include>
     </select>
 
 <!--    게시글 비밀번호 가져오기   -->

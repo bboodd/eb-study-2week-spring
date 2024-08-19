@@ -14,6 +14,8 @@ public interface PostMapper {
 
     List<PostVo> findAllPostBySearch(SearchVo searchVo);
 
+    int count(SearchVo searchVo);
+
     PostVo findPostById(int postId);
 
     int saveComment(CommentVo commentVo);

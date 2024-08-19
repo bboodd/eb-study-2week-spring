@@ -2,6 +2,8 @@ package com.study.week2.service;
 
 import com.study.week2.dto.CategoryDto;
 import com.study.week2.dto.CommentDto;
+import com.study.week2.dto.SearchDto;
+import com.study.week2.dto.response.PagingResponse;
 import com.study.week2.dto.response.PostResponseDto;
 import com.study.week2.mapper.PostMapper;
 import com.study.week2.vo.*;
@@ -10,8 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
+import static com.study.week2.vo.SearchVo.toVo;
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -63,16 +67,28 @@ public class PostService {
 
     /**
      * 검색 게시글 목록 조회
-     * @param searchVo
+     * @param searchDto
      * @return
      */
 
-    public List<PostResponseDto> findAllPostBySearch(SearchVo searchVo){
-        List<PostVo> postList = postMapper.findAllPostBySearch(searchVo);
+    public PagingResponse<PostResponseDto> findAllPostBySearch(SearchDto searchDto){
+
+        // 조건에 해당하는 데이터가 없는 경우, 응답 데이터에 비어있는 리스트와 null을 담아 반환
+        int count = postMapper.count(toVo(searchDto));
+        if(count < 1){
+            return new PagingResponse<>(Collections.emptyList(), null);
+        }
+
+        // Pagination 객체를 생성해서 페이지 정보 계산 후 SearchVo 타입 객체에 계산된 페이지 정보 저장
+        Pagination pagination = new Pagination(count, searchDto);
+        searchDto.setPagination(pagination);
+
+        // 계산된 페이지 정보의 일부(limitStart, recordSize)를 기준으로 리스트 데이터 조회 후 응답 데이터 반환
+        List<PostVo> postList = postMapper.findAllPostBySearch(toVo(searchDto));
 
         List<PostResponseDto> result = postList.stream()
                 .map(PostResponseDto::toDto).collect(toList());
-        return result;
+        return new PagingResponse<>(result, pagination);
     }
 
     /**
