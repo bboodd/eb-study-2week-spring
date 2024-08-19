@@ -8,7 +8,7 @@ import java.util.List;
 @Mapper
 public interface PostMapper {
 
-    int insertPost(PostVo postVo);
+    int savePost(PostVo postVo);
 
     List<CategoryVo> findAllCategory();
 
@@ -16,21 +16,23 @@ public interface PostMapper {
 
     PostVo findPostById(int postId);
 
-    int insertComment(CommentVo commentVo);
+    int saveComment(CommentVo commentVo);
 
     List<CommentVo> findAllCommentByPostId(int postId);
 
     int deletePostById(int postId);
 
-    int insertFile(FileVo fileVo);
+    int saveFile(FileVo fileVo);
 
     List<FileVo> findAllFileByPostId(int postId);
 
-    FileVo findFileByFileId(int fileId);
+    FileVo findFileById(int fileId);
 
     int increaseViewCountById(int postId);
 
     int updatePost(PostVo postVo);
 
-    int deleteFileByFileId(int fileId);
+    int deleteFileById(int fileId);
+
+    String findPostPasswordById(int postId);
 }

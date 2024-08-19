@@ -4,11 +4,13 @@ import com.study.week2.dto.CategoryDto;
 import com.study.week2.dto.CommentDto;
 import com.study.week2.dto.FileDto;
 import com.study.week2.dto.PostDto;
+import com.study.week2.dto.response.PostResponseDto;
 import com.study.week2.mapper.PostMapper;
 import com.study.week2.vo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -32,8 +34,9 @@ public class PostService {
      * @return
      */
 
+    @Transactional
     public int savePost(PostVo postVo){
-        postMapper.insertPost(postVo);
+        postMapper.savePost(postVo);
         int postId = postVo.getPostId();
 
         return postId;
@@ -45,8 +48,9 @@ public class PostService {
      * @return
      */
 
+    @Transactional
     public int saveComment(CommentVo commentVo){
-        int result = postMapper.insertComment(commentVo);
+        int result = postMapper.saveComment(commentVo);
         return result;
     }
 
@@ -55,11 +59,11 @@ public class PostService {
      * @return
      */
 
-    public List<CategoryDto> getCategories(){
+    public List<CategoryDto> findAllCategory(){
         List<CategoryVo> categoryList = postMapper.findAllCategory();
 
         List<CategoryDto> result = categoryList.stream()
-                .map(c -> toDto(c)).collect(toList());
+                .map(CategoryDto::toDto).collect(toList());
         return result;
     }
 
@@ -69,11 +73,11 @@ public class PostService {
      * @return
      */
 
-    public List<PostDto> getPosts(SearchVo searchVo){
+    public List<PostResponseDto> findAllPostBySearch(SearchVo searchVo){
         List<PostVo> postList = postMapper.findAllPostBySearch(searchVo);
 
-        List<PostDto> result = postList.stream()
-                .map(p -> toDto(p)).collect(toList());
+        List<PostResponseDto> result = postList.stream()
+                .map(PostResponseDto::toDto).collect(toList());
         return result;
     }
 
@@ -83,11 +87,11 @@ public class PostService {
      * @return
      */
 
-    public List<CommentDto> getComments(int postId){
+    public List<CommentDto> findAllCommentByPostId(int postId){
         List<CommentVo> commentList = postMapper.findAllCommentByPostId(postId);
 
         List<CommentDto> result = commentList.stream()
-                .map(c -> toDto(c)).collect(toList());
+                .map(CommentDto::toDto).collect(toList());
         return result;
     }
 
@@ -97,9 +101,14 @@ public class PostService {
      * @return
      */
 
-    public PostDto getPost(int postId){
-        PostDto result = toDto(postMapper.findPostById(postId));
+    public PostResponseDto findPostById(int postId){
+        PostResponseDto result = PostResponseDto.toDto(postMapper.findPostById(postId));
         return result;
+    }
+
+    public String findPostPasswordById(int postId){
+        String password = postMapper.findPostPasswordById(postId);
+        return password;
     }
 
     /**
@@ -108,7 +117,7 @@ public class PostService {
      * @return
      */
 
-    public int upViewCount(int postId){
+    public int increaseViewCountById(int postId){
         int result = postMapper.increaseViewCountById(postId);
         return result;
     }
@@ -119,11 +128,12 @@ public class PostService {
      * @return
      */
 
-    public int deletePost(int postId){
+    public int deletePostById(int postId){
         int result = postMapper.deletePostById(postId);
         return result;
     }
 
+    @Transactional
     public int updatePost(PostVo postVo) {
         int result = postMapper.updatePost(postVo);
         return result;

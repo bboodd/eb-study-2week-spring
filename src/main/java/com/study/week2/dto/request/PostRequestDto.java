@@ -26,8 +26,6 @@ public class PostRequestDto {
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{4,16}$", message = "비밀번호는 4글자 이상, 16글자 미만인 영문/숫자/특수문자를 포함한 문자여야 합니다.")
     private String password;
 
-    @NotBlank(message = "비밀번호를 한번 더 입력해주세요.")
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{4,16}$", message = "비밀번호는 4글자 이상, 16글자 미만인 영문/숫자/특수문자를 포함한 문자여야 합니다.")
     private String checkPassword;
 
     @NotBlank(message = "제목을 입력해주세요.")
@@ -37,6 +35,8 @@ public class PostRequestDto {
     @NotBlank(message = "내용을 입력해주세요.")
     @Size(max = 2000, message = "내용은 2000글자 미만이여야합니다.")
     private String content;
+
+    int[] removeFileList;
 
 
 }

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="layout/basic">
+<th:block layout:fragment="title">
+    <title>리스트 페이지</title>
+</th:block>
+
+<th:block layout:fragment="content">
+    <div class="page_tits">
+        <h3>게시판 관리</h3>
+        <p class="path"><strong>현재 위치 :</strong> <span>게시판 관리</span> <span>리스트형</span> <span>리스트</span></p>
+    </div>
+
+    <div class="content">
+        <section>
+            <!--/* 검색 */-->
+            <div class="search_box">
+                <form id="searchForm" onsubmit="return false;" autocomplete="off">
+                    <div class="sch_group fl">
+                        <label>등록일
+                            <input type="date" name="startDate" id="startDate" th:value="${searchDto.startDate}">
+                            ~
+                            <input type="date" name="endDate" id="endDate" th:value="${searchDto.endDate}">
+                        </label>
+                        <select name="categoryId" id="categoryId">
+                            <option value="0">전체 카테고리</option>
+                            <th:block th:each="category : ${categoryList}">
+                                <option th:value="${category.categoryId}" th:text="${category.categoryName}"></option>
+                            </th:block>
+                        </select>
+                        <input type="text" placeholder="검색어를 입력해 주세요." title="키워드 입력"/>
+                        <button type="button" class="bt_search"><i class="fas fa-search"></i><span class="skip_info">검색</span></button>
+                    </div>
+                </form>
+            </div>
+
+            <!--/* 리스트 */-->
+            <table class="tb tb_col">
+                <colgroup>
+                    <col style="width:50px;"/><col style="width:7.5%;"/><col style="width:auto;"/><col style="width:10%;"/><col style="width:15%;"/><col style="width:7.5%;"/>
+                </colgroup>
+                <thead>
+                <tr>
+                    <th scope="col">카테고리</th>
+                    <th scope="col">파일</th>
+                    <th scope="col">제목</th>
+                    <th scope="col">조회수</th>
+                    <th scope="col">작성자</th>
+                    <th scope="col">등록 일시</th>
+<!--                    <th scope="col">수정 일시</th>-->
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${not #lists.isEmpty( postList )}" th:each="post : ${postList}">
+
+                    <td th:text="${post.categoryName}"></td>
+                    <td th:text="${post.fileCount} == 0 ? ' ' : '파일o' "></td>
+                    <td class="tl"><a th:href="@{/post/{postId}( postId=${post.postId} )}" th:text="${post.title}"></a></td>
+                    <td th:text="${post.viewCount}"></td>
+                    <td th:text="${post.writer}"></td>
+                    <td th:text="${#temporals.format( post.createDate, 'yyyy.MM.dd HH:mm' )}"></td>
+<!--                    <td th:if="${not #strings.equals(post.createDate, post.updateDate)}" th:text="${#temporals.format( post.updateDate, 'yyyy.MM.dd HH:mm' )}"></td>-->
+<!--                    <td th:unless="${not #strings.equals(post.createDate, post.updateDate)}" th:text="'-'"></td>-->
+                </tr>
+
+                <tr th:unless="${not #lists.isEmpty( postList )}">
+                    <td colspan="5">
+                        <div class="no_data_msg">검색된 결과가 없습니다.</div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!--/* 페이지네이션 */-->
+            <div class="paging">
+                <a href="#" class="page_bt first">첫 페이지</a><a href="#" class="page_bt prev">이전 페이지 그룹</a>
+                <p><span class="on">1</span><a href="#">2</a><a href="#">3</a><a href="#">4</a><a href="#">5</a><a href="#">6</a><a href="#">7</a><a href="#">8</a><a href="#">9</a><a href="#">10</a></p>
+                <a href="#" class="page_bt next">다음 페이지 그룹</a><a href="#" class="page_bt last">마지막 페이지</a>
+            </div>
+
+            <!--/* 버튼 */-->
+            <p class="btn_set tr">
+                <a th:href="@{/post/write}" class="btns btn_st3 btn_mid">글쓰기</a>
+            </p>
+        </section>
+    </div> <!--/* .content */-->
+</th:block>
+</html>

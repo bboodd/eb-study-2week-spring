@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="layout/basic">
+<th:block layout:fragment="title">
+  <title>상세 페이지</title>
+</th:block>
+
+<th:block layout:fragment="content">
+  <div class="page_tits">
+    <h3>게시판 관리</h3>
+    <p class="path"><strong>현재 위치 :</strong> <span>게시판 관리</span> <span>리스트형</span> <span>상세정보</span></p>
+  </div>
+
+  <div class="content">
+    <section>
+      <table class="tb tb_row">
+        <colgroup>
+          <col style="width:10%;" /><col style="width:23%;" /><col style="width:10%;" /><col style="width:23%;" />
+        </colgroup>
+        <tbody>
+        <tr>
+          <th scope="row">카테고리</th>
+          <td th:text="${postDto.categoryName}"></td>
+
+          <th scope="row">등록일</th>
+          <td th:text="${#temporals.format( postDto.createDate, 'yyyy.MM.dd HH:mm' )}"></td>
+        </tr>
+        <tr>
+          <th scope="row">제목</th>
+          <td>[[ ${postDto.title} ]]</td>
+
+          <th scope="row">조회수</th>
+          <td colspan="3">[[ ${postDto.viewCount} ]]</td>
+        </tr>
+        <tr>
+          <th scope="row">이름</th>
+          <td colspan="3">[[ ${postDto.writer} ]]</td>
+        </tr>
+        <tr>
+          <th scope="row">내용</th>
+          <td colspan="3">[[ ${postDto.content} ]]</td>
+        </tr>
+        </tbody>
+      </table>
+      <p class="btn_set">
+        <a th:href="@{/post/write( postId=${postDto.postId} )}" class="btns btn_bdr4 btn_mid">수정</a>
+        <button type="button" onclick="deletePost()" class="btns btn_bdr1 btn_mid">삭제</button>
+        <a th:href="@{/}" class="btns btn_bdr3 btn_mid">뒤로</a>
+      </p>
+    </section>
+  </div> <!--/* .content */-->
+</th:block>
+
+<th:block layout:fragment="script">
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+
+    // 게시글 삭제
+    function deletePost() {
+      const id = [[ ${postDto.postId} ]];
+
+      if ( !confirm(id + '번 게시글을 삭제할까요?') ) {
+        return false;
+      }
+
+      const formHtml = `
+                    <form id="deleteForm" action="/post/delete" method="post">
+                        <input type="hidden" id="postId" name="postId" value="${id}" />
+                    </form>
+                `;
+      const doc = new DOMParser().parseFromString(formHtml, 'text/html');
+      const form = doc.body.firstChild;
+      document.body.append(form);
+      document.getElementById('deleteForm').submit();
+    }
+
+    /*]]>*/
+
+  </script>
+</th:block>
+</html>
+출처: https://congsong.tistory.com/20 [Let's develop:티스토리]
