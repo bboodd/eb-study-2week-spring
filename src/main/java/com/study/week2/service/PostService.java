@@ -1,8 +1,8 @@
 package com.study.week2.service;
 
 import com.study.week2.dto.CategoryDto;
-import com.study.week2.dto.CommentDto;
 import com.study.week2.dto.SearchDto;
+import com.study.week2.dto.response.CommentResponseDto;
 import com.study.week2.dto.response.PagingResponse;
 import com.study.week2.dto.response.PostResponseDto;
 import com.study.week2.mapper.PostMapper;
@@ -48,8 +48,25 @@ public class PostService {
 
     @Transactional
     public int saveComment(CommentVo commentVo){
-        int result = postMapper.saveComment(commentVo);
-        return result;
+        postMapper.saveComment(commentVo);
+        int resultId = commentVo.getCommentId();
+        return resultId;
+    }
+
+    public CommentResponseDto findCommentById(int commentId){
+        CommentVo commentVo = postMapper.findCommentById(commentId);
+        return CommentResponseDto.toDto(commentVo);
+    }
+
+    public int updateComment(CommentVo commentVo) {
+        postMapper.updateComment(commentVo);
+        return commentVo.getCommentId();
+    }
+
+    @Transactional
+    public int deleteComment(int commentId){
+        postMapper.deleteCommentById(commentId);
+        return commentId;
     }
 
     /**
@@ -97,11 +114,11 @@ public class PostService {
      * @return
      */
 
-    public List<CommentDto> findAllCommentByPostId(int postId){
+    public List<CommentResponseDto> findAllCommentByPostId(int postId){
         List<CommentVo> commentList = postMapper.findAllCommentByPostId(postId);
 
-        List<CommentDto> result = commentList.stream()
-                .map(CommentDto::toDto).collect(toList());
+        List<CommentResponseDto> result = commentList.stream()
+                .map(CommentResponseDto::toDto).collect(toList());
         return result;
     }
 

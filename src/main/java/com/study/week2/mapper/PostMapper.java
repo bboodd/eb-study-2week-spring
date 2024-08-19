@@ -20,6 +20,12 @@ public interface PostMapper {
 
     int saveComment(CommentVo commentVo);
 
+    CommentVo findCommentById(int commentId);
+
+    int updateComment(CommentVo commentVo);
+
+    int deleteCommentById(int commentId);
+
     List<CommentVo> findAllCommentByPostId(int postId);
 
     int deletePostById(int postId);

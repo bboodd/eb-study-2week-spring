@@ -67,7 +67,7 @@ class BoardControllerTest {
                 .andDo(print());
 
         //then
-        then(postService).should().findAllPostBySearch(SearchVo.toVo(searchDto));
+        then(postService).should().findAllPostBySearch(searchDto);
     }
 
     @Test

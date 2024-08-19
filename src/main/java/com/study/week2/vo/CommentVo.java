@@ -1,5 +1,5 @@
 package com.study.week2.vo;
-import com.study.week2.dto.CommentDto;
+import com.study.week2.dto.request.CommentRequestDto;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -30,6 +30,15 @@ public class CommentVo {
         CommentVo commentVo = CommentVo.builder()
                 .postId(commentDto.getPostId())
                 .content(commentDto.getContent())
+                .build();
+        return commentVo;
+    }
+
+    public static CommentVo toVo(CommentRequestDto commentRequestDto){
+        CommentVo commentVo = CommentVo.builder()
+                .commentId(commentRequestDto.getCommentId())
+                .postId(commentRequestDto.getPostId())
+                .content(commentRequestDto.getContent())
                 .build();
         return commentVo;
     }

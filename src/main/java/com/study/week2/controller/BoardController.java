@@ -1,7 +1,9 @@
 package com.study.week2.controller;
 
 import com.study.week2.dto.*;
+import com.study.week2.dto.request.CommentRequestDto;
 import com.study.week2.dto.request.PostRequestDto;
+import com.study.week2.dto.response.CommentResponseDto;
 import com.study.week2.dto.response.PagingResponse;
 import com.study.week2.dto.response.PostResponseDto;
 import com.study.week2.service.FileService;
@@ -62,14 +64,14 @@ public class BoardController {
     public String getPost(@PathVariable int postId, Model model){
         int visit = postService.increaseViewCountById(postId);
         PostResponseDto postResponseDto = postService.findPostById(postId);
-        List<CommentDto> commentList = postService.findAllCommentByPostId(postId);
+        List<CommentResponseDto> commentList = postService.findAllCommentByPostId(postId);
         List<FileDto> fileList = fileService.findAllFileByPostId(postId);
 
         model.addAttribute("postDto", postResponseDto);
         model.addAttribute("commentList", commentList);
         model.addAttribute("fileList", fileList);
         if(!model.containsAttribute("commentDto")){
-            model.addAttribute("commentDto", new CommentDto());
+            model.addAttribute("commentDto", new CommentRequestDto());
         }
         log.info("post : " + postResponseDto);
 
@@ -197,28 +199,45 @@ public class BoardController {
     }
 
 //    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/post/save/comment")
-    public String saveComment(@Valid CommentDto commentDto,
+    @PostMapping("/posts/{postId}/comments")
+    @ResponseBody
+    public CommentResponseDto saveComment(@PathVariable int postId, @Valid @RequestBody CommentRequestDto commentRequestDto,
                               BindingResult bindingResult,
                               Model model,
                               RedirectAttributes ra){
 
-        int postId = commentDto.getPostId();
+        int commentId = postService.saveComment(toVo(commentRequestDto));
 
-        MessageDto message = MessageDto.builder()
-                .message("댓글 등록이 완료되었습니다.")
-                .redirectUri("/post/"+postId)
-                .method(RequestMethod.GET)
-                .data(null)
-                .build();
+        return postService.findCommentById(commentId);
+    }
 
-        if(bindingResult.hasErrors()){
-            ra.addFlashAttribute("commentDto", commentDto);
-        } else{
-            postService.saveComment(toVo(commentDto));
+    //댓글 리스트 조회
+    @GetMapping("/posts/{postId}/comments")
+    @ResponseBody
+    public List<CommentResponseDto> findAllCommentByPostId(@PathVariable int postId){
+        return postService.findAllCommentByPostId(postId);
+    }
 
-        }
-        return showMessageAndRedirect(message, model);
+    // 댓글 상세정보 조회
+    @GetMapping("/post/{postId}/comments/{commentId}")
+    @ResponseBody
+    public CommentResponseDto findCommentById(@PathVariable int postId, @PathVariable int commentId){
+        return postService.findCommentById(commentId);
+    }
+
+    // 기존 댓글 수정
+    @PatchMapping("/posts/{postId}/comments/{commentId}")
+    @ResponseBody
+    public CommentResponseDto updateComment(@PathVariable int postId, @PathVariable int commentId, @RequestBody CommentRequestDto commentRequestDto){
+        postService.updateComment(toVo(commentRequestDto));
+        return postService.findCommentById(commentId);
+    }
+
+    // 댓글 삭제
+    @DeleteMapping("/posts/{postId}/comments/{commentId}")
+    @ResponseBody
+    public int deleteComment(@PathVariable int postId, @PathVariable int commentId){
+        return postService.deleteComment(commentId);
     }
 
 //    @ResponseStatus(HttpStatus.OK)
