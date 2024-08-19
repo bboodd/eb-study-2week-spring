@@ -1,6 +1,5 @@
 package com.study.week2.vo;
 
-import com.study.week2.dto.PostDto;
 import com.study.week2.dto.request.PostRequestDto;
 import lombok.*;
 
@@ -33,21 +32,9 @@ public class PostVo {
     /**
      * dto를 vo로 변환
      * 화면에서 받아서 db로 넣을때
-     * @param postDto
+     * @param postRequestDto
      * @return postVo
      */
-
-    public static PostVo toVo(PostDto postDto){
-        PostVo postVo = PostVo.builder()
-                .postId(postDto.getPostId())
-                .categoryId(postDto.getCategoryId())
-                .writer(postDto.getName())
-                .password(postDto.getPassword())
-                .title(postDto.getTitle())
-                .content(postDto.getContent())
-                .build();
-        return postVo;
-    }
 
     public static PostVo toVo(PostRequestDto postRequestDto){
         PostVo postVo = PostVo.builder()

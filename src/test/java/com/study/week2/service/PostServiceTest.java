@@ -4,8 +4,6 @@ import com.study.week2.dto.response.PostResponseDto;
 import com.study.week2.mapper.PostMapper;
 import com.study.week2.dto.CategoryDto;
 import com.study.week2.dto.CommentDto;
-import com.study.week2.dto.FileDto;
-import com.study.week2.dto.PostDto;
 import com.study.week2.vo.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

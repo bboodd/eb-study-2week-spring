@@ -108,13 +108,27 @@ public class BoardController {
 
         String password = postRequestDto.getPassword();
         String checkPassword = postRequestDto.getCheckPassword();
+        MessageDto message = MessageDto.builder()
+                .message("게시글 등록이 완료되었습니다.")
+                .redirectUri("/")
+                .method(RequestMethod.GET)
+                .data(null)
+                .build();
 
         if(bindingResult.hasErrors() || !password.equals(checkPassword)){
             if(!password.equals(checkPassword)) {
                 bindingResult.rejectValue("checkPassword", "equal", "입력한 비밀번호와 다릅니다.");
             }
+
+            message = MessageDto.builder()
+                    .message(bindingResult.getFieldError().toString())
+                    .redirectUri("/post/write")
+                    .method(RequestMethod.GET)
+                    .data(null)
+                    .build();
+
             model.addAttribute("postDto", postRequestDto);
-            return "redirect:/write";
+            return showMessageAndRedirect(message, model);
         }
 
         //TODO:글로벌 예외 컨트롤러 // 비밀번호 체크 서비스에서? x 서비스에서는 db정보랑 비교
@@ -130,7 +144,7 @@ public class BoardController {
             log.info("등록된 파일 개수: " + fileResult);
         }
 
-        return "redirect:/";
+        return showMessageAndRedirect(message, model);
     }
 
     @PostMapping("/post/update")
@@ -140,6 +154,12 @@ public class BoardController {
 
         int postId = postRequestDto.getPostId();
         String correctPassword = postService.findPostPasswordById(postId);
+        MessageDto message = MessageDto.builder()
+                .message("게시글 수정이 완료되었습니다.")
+                .redirectUri("/")
+                .method(RequestMethod.GET)
+                .data(null)
+                .build();
 
         if(bindingResult.hasErrors() || !postRequestDto.getPassword().equals(correctPassword)){
             if(!postRequestDto.getPassword().equals(correctPassword)){
@@ -169,11 +189,11 @@ public class BoardController {
             log.info("삭제된 파일 개수 : " + fileResult);
         }
 
-        return "redirect:/post/"+postId;
+        return showMessageAndRedirect(message, model);
     }
 
 //    @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/post/add/comment")
+    @PostMapping("/post/save/comment")
     public String saveComment(@Valid CommentDto commentDto,
                               BindingResult bindingResult,
                               Model model,
@@ -181,13 +201,20 @@ public class BoardController {
 
         int postId = commentDto.getPostId();
 
+        MessageDto message = MessageDto.builder()
+                .message("댓글 등록이 완료되었습니다.")
+                .redirectUri("/post/"+postId)
+                .method(RequestMethod.GET)
+                .data(null)
+                .build();
+
         if(bindingResult.hasErrors()){
             ra.addFlashAttribute("commentDto", commentDto);
         } else{
             postService.saveComment(toVo(commentDto));
 
         }
-        return "redirect:/post/"+postId;
+        return showMessageAndRedirect(message, model);
     }
 
 //    @ResponseStatus(HttpStatus.OK)
@@ -222,49 +249,32 @@ public class BoardController {
 
 //    @ResponseStatus(HttpStatus.OK)
     @PostMapping("/post/delete")
-    public String deletePost(@RequestParam int postId) {
+    public String deletePost(@RequestParam int postId, Model model) {
         boolean success = false;
         int result = postService.deletePostById(postId);
+
+        MessageDto message = MessageDto.builder()
+                .message("게시글 삭제이 완료되었습니다.")
+                .redirectUri("/")
+                .method(RequestMethod.GET)
+                .data(null)
+                .build();
 
         if(result != 0){
             success = true;
         }
 
         if(success){
-            return "redirect:/";
+            return showMessageAndRedirect(message, model);
         } else{
             return "redirect:/post/"+postId;
         }
     }
 
-    @PostMapping("/check")
-    public String updatePassCheck(@RequestParam int postId,
-                             @RequestParam String inputPassword) {
-        boolean success = false;
-        String correctPassword = postService.findPostPasswordById(postId);
-        if(!inputPassword.isBlank() && inputPassword.equals(correctPassword)){
-            success = true;
-        }
-        if(success){
-            return "redirect:/update/"+postId;
-        } else{
-            return "redirect:/post/"+postId;
-        }
-    }
-
-    @GetMapping("/update/{postId}")
-    public String getUpdate(@PathVariable int postId, Model model) {
-        PostResponseDto postResponseDto = postService.findPostById(postId);
-        List<FileDto> fileList = fileService.findAllFileByPostId(postId);
-        List<CategoryDto> categoryList = postService.findAllCategory();
-
-        if(!model.containsAttribute("postDto")){
-            model.addAttribute("postDto", postResponseDto);
-        }
-        model.addAttribute("fileList", fileList);
-        model.addAttribute("categoryList", categoryList);
-
-        return "update";
+    //사용자에게 메시지를 전달하고, 페이지를 리다이렉트 한다.
+    private String showMessageAndRedirect(MessageDto messageDto, Model model){
+        model.addAttribute("params", messageDto);
+        return "common/messageRedirect";
     }
 
 }
