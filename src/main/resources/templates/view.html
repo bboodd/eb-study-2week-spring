@@ -41,12 +41,12 @@
         </tr>
 
 
-        <!-- 저장된 파일 -->
-        <th scope="row">파일</th>
-        <td colspan="3" th:if="${fileList != null}" th:each="file : ${fileList}">
-          <a th:href="@{/download/{fileId}(fileId=${file.fileId})}"
-             th:text="${file.fileOriginalName}"></a>
-        </td>
+        <tr>
+          <th scope="row">첨부파일</th>
+          <td id="files" colspan="3">
+
+          </td>
+        </tr>
 
         </tbody>
       </table>
@@ -104,7 +104,31 @@
     /*<![CDATA[*/
 
     window.onload = () => {
+      findAllFile();
       findAllComment();
+    }
+
+    // 전체 파일 조회
+    function findAllFile() {
+
+      // 1. API 호출
+      const postId = [[ ${post.id}]];
+      const response = getJson(`/posts/${postId}/files`);
+
+      // 2. 로직 종료
+      if ( !response.length ) {
+        return false;
+      }
+
+      // 3. 파일 영역 추가
+      let fileHtml = '<div class="file_down"><div class="cont">';
+      response.forEach(row => {
+        fileHtml += `<a href="/posts/${postId}/files/${row.fileId}/download"><span class="icons"><i class="fas fa-folder-open"></i></span>${row.originalName}</a>`;
+      })
+      fileHtml += '</div></div>';
+
+      // 4. 파일 HTML 렌더링
+      document.getElementById('files').innerHTML = fileHtml;
     }
 
 
